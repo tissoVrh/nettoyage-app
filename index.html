@@ -1,0 +1,457 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nettoyage — Clients, Planning & Factures</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f7; --surface:#fff; --surface-2:#f8fafc; --ink:#0f172a; --muted:#64748b;
+  --line:#e6ebf1; --accent:#0f766e; --accent-2:#0e7490;
+  --resto:#0284c7; --maison:#059669; --airbnb:#d97706;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 10px 30px rgba(15,23,42,.06);
+  --radius:18px;
+}
+*{box-sizing:border-box;font-family:'Lexend',system-ui,sans-serif}
+body{margin:0;color:var(--ink);font-size:15px;min-height:100vh;
+  background:
+    radial-gradient(1100px 600px at 8% -8%, #e6fbfb 0%, transparent 52%),
+    radial-gradient(1000px 520px at 108% 4%, #e7fbf3 0%, transparent 52%),
+    radial-gradient(900px 500px at 50% 120%, #eef0ff 0%, transparent 52%),
+    var(--bg);
+  background-attachment:fixed}
+.app{display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:248px;flex:0 0 248px;padding:22px 16px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;gap:6px;
+  background:rgba(255,255,255,.72);backdrop-filter:blur(14px);border-right:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-size:19px;font-weight:700;margin:4px 8px 18px;letter-spacing:-.02em}
+.brand .dot{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:18px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-2));box-shadow:var(--shadow)}
+nav{display:flex;flex-direction:column;gap:4px}
+nav button{display:flex;align-items:center;gap:11px;text-align:left;background:transparent;color:var(--muted);
+  border:0;border-left:3px solid transparent;padding:12px 14px;border-radius:12px;cursor:pointer;
+  font-size:15px;font-weight:500;font-family:inherit;transition:background .18s ease,color .18s ease,transform .18s ease}
+nav button:hover{background:var(--surface-2);color:var(--ink);transform:translateX(2px)}
+nav button.on{background:#0f766e;color:#fff;border-left-color:#115e59;font-weight:600}
+nav button.on:hover{background:#115e59;color:#fff}
+nav .ico{font-size:17px;width:20px;text-align:center}
+.side-foot{margin-top:auto;font-size:11px;color:var(--muted);padding:8px;line-height:1.5}
+
+/* MAIN */
+main{flex:1;padding:26px 30px 50px;max-width:1180px}
+.topbar{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.topbar h1{font-size:26px;font-weight:700;margin:0;letter-spacing:-.02em}
+.topbar .sub{color:var(--muted);font-size:13px}
+.tab{display:none;animation:fade .25s ease}
+.tab.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* DASHBOARD */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+  transition:transform .18s ease,box-shadow .18s ease}
+.stat:hover{transform:translateY(-3px);box-shadow:0 14px 36px rgba(15,23,42,.10)}
+.stat .k{font-size:12px;color:var(--muted);font-weight:500;letter-spacing:.02em}
+.stat .v{font-size:30px;font-weight:700;margin-top:6px;letter-spacing:-.02em}
+.stat .v small{font-size:15px;font-weight:500;color:var(--muted)}
+.stat .bar{height:4px;border-radius:4px;margin-top:12px;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+
+/* CARDS / FORM */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card h2{font-size:18px;margin:0 0 14px;font-weight:600;letter-spacing:-.01em}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.row>*{flex:1;min-width:130px}
+label.fld{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--muted);font-weight:500}
+input,select,textarea{padding:11px 13px;border:1px solid var(--line);border-radius:11px;font-size:15px;width:100%;
+  background:var(--surface-2);color:var(--ink);font-family:inherit;transition:border-color .16s ease,box-shadow .16s ease}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px rgba(15,118,110,.15)}
+button.act{background:var(--accent);color:#fff;border:0;padding:11px 18px;
+  border-radius:11px;cursor:pointer;font-size:15px;font-weight:600;font-family:inherit;transition:transform .16s ease,filter .16s ease}
+button.act:hover{transform:translateY(-1px);filter:brightness(1.07)}
+button.ghost{background:var(--surface-2);color:var(--muted);border:1px solid var(--line);padding:9px 14px;border-radius:11px;cursor:pointer;font-size:14px;font-family:inherit;transition:background .16s ease,color .16s ease}
+button.ghost:hover{background:#eef2f7;color:var(--ink)}
+button.del{background:#fee2e2;color:#b91c1c;border:0;padding:5px 9px;border-radius:8px;cursor:pointer;font-size:13px;transition:background .16s ease}
+button.del:hover{background:#fecaca}
+
+/* TABLE */
+.tablewrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;padding:6px}
+table{width:100%;border-collapse:collapse}
+th,td{border-bottom:1px solid var(--line);padding:13px 14px;text-align:left;font-size:14px}
+th{background:var(--surface-2);cursor:pointer;font-weight:600;color:var(--muted);font-size:12px;letter-spacing:.03em;text-transform:uppercase;user-select:none}
+th:hover{color:var(--ink)}
+tr:last-child td{border-bottom:0}
+tbody tr{transition:background .14s ease}
+tbody tr:hover{background:var(--surface-2)}
+
+/* TAGS */
+.tag{padding:3px 11px;border-radius:20px;font-size:12px;font-weight:600;display:inline-block}
+.resto{background:#e0f2fe;color:var(--resto)}.maison{background:#d1fae5;color:var(--maison)}.airbnb{background:#fef3c7;color:#92400e}
+
+/* CALENDAR */
+.cal-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.cal-head b{font-size:18px;font-weight:600;min-width:170px;text-align:center}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.dow{text-align:center;font-size:12px;color:var(--muted);font-weight:600;padding:4px 0}
+.cell{background:var(--surface-2);border:1px solid var(--line);border-radius:13px;min-height:96px;padding:7px;font-size:13px;cursor:pointer;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease}
+.cell:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+.cell.out{background:transparent;color:#cbd5e1;cursor:default}
+.cell.out:hover{transform:none;box-shadow:none;border-color:var(--line)}
+.cell.today{box-shadow:0 0 0 2px var(--accent) inset;background:#f0fdfa}
+.cnum{font-weight:700;margin-bottom:4px}
+.job{margin:3px 0;padding:3px 6px;border-radius:7px;color:#fff;font-size:11px;line-height:1.25;display:flex;justify-content:space-between;gap:4px}
+.job span{cursor:pointer;opacity:.8}
+.job span:hover{opacity:1}
+.j-resto{background:var(--resto)}.j-maison{background:var(--maison)}.j-airbnb{background:var(--airbnb)}
+
+/* CHECKLISTS */
+.checks{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.checks .card{margin:0}
+.check li{margin:9px 0;list-style:none}
+.check label{display:flex;gap:10px;align-items:flex-start;font-size:14px;cursor:pointer;line-height:1.4}
+.check input{width:18px;height:18px;flex:0 0 18px;margin-top:1px;accent-color:var(--accent);border-radius:5px}
+
+.hint{font-size:13px;color:var(--muted);margin:2px 0 12px}
+.print{display:none}
+@media print{body{background:#fff}.noprint{display:none}.print{display:block}.sidebar{display:none}main{margin:0;padding:0}}
+@media(max-width:880px){
+  .app{flex-direction:column}
+  .sidebar{width:100%;height:auto;position:relative;flex:none;flex-direction:row;flex-wrap:wrap;align-items:center;border-right:0;border-bottom:1px solid var(--line)}
+  .brand{margin:0 12px 0 4px}.side-foot{display:none}
+  nav{flex-direction:row;flex-wrap:wrap}
+  .stats{grid-template-columns:repeat(2,1fr)}.checks{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><span class="dot">🧹</span> Nettoyage</div>
+  <nav>
+    <button data-t="dash" class="on"><span class="ico">📊</span> Tableau de bord</button>
+    <button data-t="clients"><span class="ico">👥</span> Clients</button>
+    <button data-t="planning"><span class="ico">📅</span> Planning</button>
+    <button data-t="check"><span class="ico">✅</span> Checklists</button>
+    <button data-t="fact"><span class="ico">🧾</span> Factures</button>
+  </nav>
+  <div class="side-foot">Données sauvegardées<br>sur cet appareil.</div>
+</aside>
+
+<main>
+  <div class="topbar">
+    <h1 id="pageTitle">Tableau de bord</h1>
+    <span class="sub">Gestion client · planning · facturation</span>
+  </div>
+
+<!-- DASHBOARD -->
+<section id="dash" class="tab on">
+  <div class="stats" id="dashStats"></div>
+  <div class="card">
+    <h2>Ce mois-ci en un coup d'œil</h2>
+    <div class="hint">Les chiffres se calculent automatiquement depuis le planning et les clients.</div>
+    <div id="dashNote" style="font-size:14px;color:var(--ink);line-height:1.6"></div>
+  </div>
+  <div class="card">
+    <h2>Sauvegarde & partage</h2>
+    <div class="hint">Exporte pour garder une copie ou transférer vers un autre appareil. Importe pour restaurer.</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="act" onclick="exportData()">⬇ Exporter (backup)</button>
+      <button class="ghost" onclick="imp.click()">⬆ Importer</button>
+      <input id="imp" type="file" accept="application/json" style="display:none" onchange="importData(this)">
+    </div>
+  </div>
+</section>
+
+<!-- CLIENTS -->
+<section id="clients" class="tab">
+  <div class="card">
+    <h2>Nouveau client</h2>
+    <div class="row">
+      <label class="fld">Nom<input id="c_nom" placeholder="Nom du client"></label>
+      <label class="fld">Type<select id="c_type"><option value="resto">Restaurant</option><option value="maison">Maison</option><option value="airbnb">Airbnb</option></select></label>
+      <label class="fld">Adresse<input id="c_adr" placeholder="Adresse"></label>
+    </div>
+    <div class="row">
+      <label class="fld">Fréquence<select id="c_freq"><option value="quotidien">Tous les jours</option><option value="hebdo">Hebdo</option><option value="bihebdo">2×/sem</option><option value="mensuel">Mensuel</option><option value="ponctuel">Ponctuel</option></select></label>
+      <label class="fld">Heures / passage<input id="c_heures" type="number" value="3.5" step="0.5"></label>
+      <label class="fld">Tarif (€)<input id="c_tarif" type="number" placeholder="Tarif €"></label>
+      <label class="fld">Tél<input id="c_tel" placeholder="Tél"></label>
+    </div>
+    <label class="fld" style="margin-bottom:12px">Notes<input id="c_notes" placeholder="Notes (accès, code, exigences…)"></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="act" onclick="addClient()">+ Ajouter client</button>
+      <button class="ghost" onclick="if(confirm('Vider TOUTE la data (clients + factures) ?')){localStorage.removeItem(KEY);location.reload()}">Vider tout</button>
+    </div>
+  </div>
+  <div class="hint">Clique sur un titre de colonne pour trier.</div>
+  <div class="tablewrap">
+    <table id="clientsTable"><thead><tr>
+      <th data-k="nom">Client</th><th data-k="type">Type</th><th data-k="adr">Adresse</th>
+      <th data-k="freq">Fréq.</th><th data-k="heures">H./passage</th><th data-k="tarif">Tarif</th><th data-k="tel">Tél</th><th></th>
+    </tr></thead><tbody></tbody></table>
+  </div>
+</section>
+
+<!-- PLANNING -->
+<section id="planning" class="tab">
+  <div class="card">
+    <h2>Planifier un passage</h2>
+    <div class="row">
+      <label class="fld">Client<select id="p_client"></select></label>
+      <label class="fld">Date<input id="p_date" type="date"></label>
+      <label class="fld">Heures<input id="p_heures" type="number" placeholder="H (défaut client)" step="0.5"></label>
+      <button class="act" style="flex:0 0 auto;align-self:flex-end" onclick="planAdd()">Planifier</button>
+    </div>
+    <div class="hint">Choisis client + date, ou clique un jour du calendrier pour y mettre la date. ✕ sur un passage pour le retirer.</div>
+  </div>
+  <div class="card">
+    <div class="cal-head">
+      <button class="ghost" onclick="navMonth(-1)">‹</button>
+      <b id="monthLabel"></b>
+      <button class="ghost" onclick="navMonth(1)">›</button>
+      <button class="ghost" onclick="goToday()">Aujourd'hui</button>
+    </div>
+    <div class="grid7">
+      <div class="dow">Lun</div><div class="dow">Mar</div><div class="dow">Mer</div><div class="dow">Jeu</div><div class="dow">Ven</div><div class="dow">Sam</div><div class="dow">Dim</div>
+    </div>
+    <div class="grid7" id="monthGrid" style="margin-top:8px"></div>
+  </div>
+  <div class="card" id="planifRest"></div>
+</section>
+
+<!-- CHECKLISTS -->
+<section id="check" class="tab">
+  <div class="checks">
+    <div class="card"><h2>🍽️ Restaurant</h2><ul class="check" id="ck_resto"></ul></div>
+    <div class="card"><h2>🏠 Maison</h2><ul class="check" id="ck_maison"></ul></div>
+    <div class="card"><h2>🔑 Airbnb (turnover)</h2><ul class="check" id="ck_airbnb"></ul></div>
+  </div>
+  <button class="act noprint" style="margin-top:14px" onclick="window.print()">Imprimer / PDF</button>
+</section>
+
+<!-- FACTURES -->
+<section id="fact" class="tab">
+  <div class="card">
+    <h2>Mon entreprise</h2>
+    <div class="row">
+      <label class="fld">Nom<input id="co_nom" placeholder="Nom (ex: Net Clean SPRL)"></label>
+      <label class="fld">Adresse<input id="co_adr" placeholder="Adresse"></label>
+      <label class="fld">N° TVA<label style="display:flex;flex-direction:column;gap:5px"></label><input id="co_tva" placeholder="N° TVA (BE…)"></label>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Générer une facture</h2>
+    <div class="row">
+      <label class="fld">Client<select id="f_client"></select></label>
+      <label class="fld">Date<input id="f_date" type="date"></label>
+      <label class="fld">Objet<input id="f_obj" placeholder="Objet (ex: Nettoyage hebdo juin)"></label>
+    </div>
+    <label style="font-size:14px;display:flex;gap:8px;align-items:center;margin:4px 0 12px;color:var(--ink)"><input type="checkbox" id="f_tva" style="width:18px;height:18px;accent-color:var(--accent)" onchange="toggleTVA()"> TVA applicable (21%) — coche quand tu passes en société</label>
+    <div id="f_lines"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="act" onclick="addLine()">+ Ligne</button>
+      <button class="act" onclick="saveInvoice()">Générer facture</button>
+    </div>
+    <div class="hint" id="f_preview"></div>
+  </div>
+  <div class="card print" id="factureDoc"></div>
+</section>
+
+</main>
+</div>
+
+<script>
+const KEY='nettoyage_v1';
+// Seed exemple seulement si rien n'existe encore
+const SEED={inv:3,co:{nom:'Ton Entreprise',adr:'',tva:''},
+  clients:[
+    {nom:'Le Cosmopolite',type:'resto',adr:'Rue Neuve 12, 1000 Bruxelles',freq:'hebdo',heures:4,tarif:120,tel:'02 111 22 33',notes:'Code portail 1234, entrée cuisine par derrière'},
+    {nom:'Famille Laurent',type:'maison',adr:'Avenue Louise 45, 1050 Bruxelles',freq:'mensuel',heures:3,tarif:80,tel:'0470 55 66 77',notes:'Chien friendly, laisser gamelle pleine'},
+    {nom:'Cosy Loft Center',type:'airbnb',adr:'Rue du Midi 8, 1000 Bruxelles',freq:'bihebdo',heures:2.5,tarif:45,tel:'',notes:'Turnover entre guests, déposer clés dans boîte'}
+  ],
+  plan:[
+    {client:'Le Cosmopolite',date:'2026-08-07',heures:4},
+    {client:'Famille Laurent',date:'2026-08-05',heures:3},
+    {client:'Cosy Loft Center',date:'2026-08-08',heures:2.5}
+  ]};
+const save=()=>localStorage.setItem(KEY,JSON.stringify(D));
+let D=JSON.parse(localStorage.getItem(KEY));
+if(!D){D=SEED;localStorage.setItem(KEY,JSON.stringify(D));}
+if(!Array.isArray(D.plan)){ // migration anciens "du"
+  D.plan=[];
+  D.clients.forEach(c=>{if(c.du)D.plan.push({client:c.nom,date:c.du,heures:c.heures||0});delete c.du;});
+  save();
+}
+
+// tabs
+const TITLES={dash:'Tableau de bord',clients:'Clients',planning:'Planning',check:'Checklists',fact:'Factures'};
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');document.getElementById(b.dataset.t).classList.add('on');
+  pageTitle.textContent=TITLES[b.dataset.t]||'';
+  if(b.dataset.t==='planning')renderPlanning();
+  if(b.dataset.t==='fact'){renderFactureClients();co_nom.value=D.co.nom||'';co_adr.value=D.co.adr||'';co_tva.value=D.co.tva||'';}
+  if(b.dataset.t==='dash')renderDash();
+});
+
+const TYPES={resto:'Restaurant',maison:'Maison',airbnb:'Airbnb'};
+const FREQ={quotidien:'Tous les jours',hebdo:'Hebdo',bihebdo:'2×/sem',mensuel:'Mensuel',ponctuel:'Ponctuel'};
+const tag=t=>`<span class="tag ${t}">${TYPES[t]}</span>`;
+
+// DASHBOARD
+function renderDash(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth()+1;
+  const mp=D.plan.filter(p=>{const yy=+p.date.slice(0,4),mm=+p.date.slice(5,7);return yy===y&&mm===m;});
+  const h=mp.reduce((a,p)=>a+(+p.heures||0),0);
+  const ca=Math.round(h*28);
+  dashStats.innerHTML=`
+    <div class="stat"><div class="k">Clients actifs</div><div class="v">${D.clients.length}</div><div class="bar"></div></div>
+    <div class="stat"><div class="k">Passages ce mois</div><div class="v">${mp.length}</div><div class="bar"></div></div>
+    <div class="stat"><div class="k">Heures ce mois</div><div class="v">${h} <small>h</small></div><div class="bar"></div></div>
+    <div class="stat"><div class="k">Est. CA (28€/h)</div><div class="v">${ca} <small>€</small></div><div class="bar"></div></div>`;
+  const reste=D.clients.length-mp.length;
+  dashNote.innerHTML=`${D.clients.length?`Rythme du mois : <b>${h} h</b> planifiées sur <b>${D.clients.length}</b> client(s), soit environ <b>${ca} €</b> de chiffre estimé.`:'Aucun client pour l\'instant — ajoute le premier depuis l\'onglet Clients.'}${reste>0?` <span style="color:var(--muted)">(${reste} client(s) sans passage ce mois)</span>`:''}`;
+}
+
+// CLIENTS
+let sortK='nom',sortAsc=true;
+function addClient(){
+  const c={nom:c_nom.value.trim(),type:c_type.value,adr:c_adr.value.trim(),
+    freq:c_freq.value,heures:+c_heures.value||0,tarif:+c_tarif.value||0,tel:c_tel.value.trim(),notes:c_notes.value.trim()};
+  if(!c.nom){alert('Nom requis');return}
+  D.clients.push(c);save();clearForm();renderClients();renderDash();
+}
+function clearForm(){['c_nom','c_adr','c_tarif','c_tel','c_notes'].forEach(i=>i.value='');c_type.value='resto';c_freq.value='hebdo';c_heures.value='3.5'}
+function delClient(i){D.clients.splice(i,1);save();renderClients();renderDash()}
+function renderClients(){
+  const tb=clientsTable.querySelector('tbody');
+  let rows=[...D.clients].sort((a,b)=>{
+    let x=a[sortK]||'',y=b[sortK]||'';
+    return (x<y?-1:x>y?1:0)*(sortAsc?1:-1);
+  });
+  tb.innerHTML=rows.map((c,i)=>`<tr>
+    <td style="font-weight:600">${c.nom}</td><td>${tag(c.type)}</td><td>${c.adr||''}</td>
+    <td>${FREQ[c.freq]||c.freq}</td><td>${c.heures?c.heures+' h':''}</td><td>${c.tarif?c.tarif+' €':''}</td><td>${c.tel||''}</td>
+    <td><button class="del" onclick="delClient(${D.clients.indexOf(c)})">✕</button></td></tr>`).join('')
+    ||'<tr><td colspan="8" style="color:#94a3b8;text-align:center;padding:28px">Aucun client — ajoute le premier.</td></tr>';
+}
+document.querySelectorAll('#clientsTable th').forEach(th=>th.onclick=()=>{
+  if(sortK===th.dataset.k)sortAsc=!sortAsc;else{sortK=th.dataset.k;sortAsc=true}renderClients();
+});
+
+// PLANNING — ponytail: vue mois navigable, démarre oct 2026, stock D.plan[]
+let viewY=2026, viewM=9; // mois 0-indexé: 9 = octobre
+const MOIS=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+function planClientSelect(){
+  p_client.innerHTML=D.clients.map(c=>`<option>${c.nom}</option>`).join('')||'<option value="">— aucun client —</option>';
+}
+function planAdd(){
+  const nom=p_client.value;
+  if(!nom){alert('Ajoute d\'abord un client');return}
+  const date=p_date.value;
+  if(!date){alert('Choisis une date');return}
+  const def=(D.clients.find(c=>c.nom===nom)||{}).heures||0;
+  const h=+p_heures.value||def;
+  D.plan.push({client:nom,date,heures:h});save();renderPlanning();renderDash();
+}
+function planDel(i){D.plan.splice(i,1);save();renderPlanning();renderDash()}
+function dayClick(ds){p_date.value=ds;p_date.focus();}
+function navMonth(d){viewM+=d;if(viewM<0){viewM=11;viewY--}else if(viewM>11){viewM=0;viewY++}renderPlanning()}
+function goToday(){const t=new Date();viewY=t.getFullYear();viewM=t.getMonth();renderPlanning()}
+function renderPlanning(){
+  if(!p_client.options.length)planClientSelect();
+  monthLabel.textContent=`${MOIS[viewM]} ${viewY}`;
+  const first=new Date(viewY,viewM,1);
+  const start=(first.getDay()+6)%7; // lundi=0
+  const days=new Date(viewY,viewM+1,0).getDate();
+  let cells='';
+  for(let i=0;i<start;i++){
+    const d=new Date(viewY,viewM,-(start-i)+1);
+    cells+=`<div class="cell out" onclick="dayClick('${iso(d)}')"><div class="cnum">${d.getDate()}</div></div>`;
+  }
+  const today=new Date();
+  for(let n=1;n<=days;n++){
+    const ds=iso(new Date(viewY,viewM,n));
+    const jobs=D.plan.filter(p=>p.date===ds)
+      .map(p=>{const t=(D.clients.find(c=>c.nom===p.client)||{}).type||'';
+        return `<div class="job j-${t}">${p.client}${p.heures?' · '+p.heures+'h':''} <span onclick="event.stopPropagation();planDel(${D.plan.indexOf(p)})">✕</span></div>`;})
+      .join('');
+    const isTod=(viewY===today.getFullYear()&&viewM===today.getMonth()&&n===today.getDate());
+    cells+=`<div class="cell${isTod?' today':''}" onclick="dayClick('${ds}')"><div class="cnum">${n}</div>${jobs}</div>`;
+  }
+  const end=(start+days)%7;
+  for(let i=1;i<=((7-end)%7||0);i++){
+    const d=new Date(viewY,viewM+1,i);
+    cells+=`<div class="cell out" onclick="dayClick('${iso(d)}')"><div class="cnum">${d.getDate()}</div></div>`;
+  }
+  monthGrid.innerHTML=cells;
+  const totalM=D.plan.filter(p=>{const y=+p.date.slice(0,4),m=+p.date.slice(5,7);return y===viewY&&m===viewM+1;})
+    .reduce((a,p)=>a+(+p.heures||0),0);
+  planifRest.innerHTML=`<b>Total ${MOIS[viewM]} ${viewY} :</b> ${totalM} h planifiées`;
+}
+function iso(d){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`}
+
+// CHECKLISTS
+const CHECK={
+  resto:['Cuisine pro : plans de travail, hottes, frigos','Sanitaires client & perso','Sol gratté + désinfecté','Salles/cuisine : poubelles vidées','Vitres & poignées','Matériel rangé, produits approvisionnés'],
+  maison:['Poussière (meubles, plinthes, objets)','Aspirateur + serpillière tous sols','Salles de bain : wc, douche, miroirs','Cuisine : plan de travail, évier, appareils','Chambres : lits faits, surfaces','Vidage poubelles, produits rangés'],
+  airbnb:['Check-out : linge retiré','Lit neuf + taie fraîche','Ménage complet salle de bain','Cuisine propre, vaisselle, frigo vide','Aspiration + sol','Photos avant/après pour l\'hôte','Clés déposées / code mis à jour']
+};
+function renderChecks(){for(const t in CHECK){
+  document.getElementById('ck_'+t).innerHTML=CHECK[t].map(x=>`<li><label><input type="checkbox"> ${x}</label></li>`).join('');
+}}
+renderChecks();
+
+// FACTURES
+function renderFactureClients(){f_client.innerHTML='<option value="">— choisir —</option>'+D.clients.map(c=>`<option>${c.nom}</option>`).join('')}
+function addLine(){const d=document.createElement('div');d.className='row';
+  d.innerHTML='<label class="fld">Description<input placeholder="Description" class="ld"></label><label class="fld">Qté<input type="number" placeholder="Qté" class="lq" value="1"></label><label class="fld">P.U. €<input type="number" placeholder="P.U. €" class="lp"></label>';
+  f_lines.appendChild(d);}
+function toggleTVA(){/* visuel only, calcul dans saveInvoice */}
+function saveInvoice(){
+  D.co={nom:co_nom.value,adr:co_adr.value,tva:co_tva.value};save();
+  if(!f_client.value){alert('Choisis un client');return}
+  D.inv++;save();
+  const lines=[...f_lines.querySelectorAll('.row')].map(r=>({
+    d:r.querySelector('.ld').value, q:+r.querySelector('.lq').value||0, p:+r.querySelector('.lp').value||0}));
+  const ht=lines.reduce((s,l)=>s+l.q*l.p,0);
+  const tvaOn=f_tva.checked, tva=tvaOn?+(ht*0.21).toFixed(2):0, ttc=ht+tva;
+  const num=String(D.inv).padStart(4,'0');
+  const tvaLine=tvaOn
+    ? `<tr><th colspan="3">TVA 21%</th><th>${tva.toFixed(2)} €</th></tr><tr><th colspan="3">Total TVAC</th><th>${ttc.toFixed(2)} €</th></tr>`
+    : `<tr><th colspan="3">Total HTVA</th><th>${ht.toFixed(2)} €</th></tr>`;
+  const tvaNote=tvaOn
+    ? `<p style="font-size:12px;margin-top:16px;color:#475569">TVA 21% appliquée conformément au régime normal en vigueur.</p>`
+    : `<p style="font-size:12px;margin-top:16px;color:#475569"><i>TVA non applicable, art. 56 §2 CIR 92 (statut petite entreprise / indépendant en personne physique) — à confirmer selon ton statut exact.</i></p>`;
+  factureDoc.innerHTML=`<h2 style="margin:0 0 14px">Facture n° ${num}</h2>
+    <p style="margin:0 0 6px"><b>${D.co.nom||'Ton entreprise'}</b></p>${D.co.adr?`<p style="margin:0 0 6px;color:#475569">${D.co.adr}</p>`:''}${D.co.tva?`<p style="margin:0 0 6px;color:#475569">TVA: ${D.co.tva}</p>`:''}
+    <p style="margin:14px 0 6px"><b>Client :</b> ${f_client.value}<br><b>Date :</b> ${f_date.value||new Date().toISOString().slice(0,10)}<br><b>Objet :</b> ${f_obj.value}</p>
+    <table style="margin-top:14px"><thead><tr><th>Description</th><th>Qté</th><th>P.U.</th><th>Total</th></tr></thead><tbody>
+    ${lines.map(l=>`<tr><td>${l.d}</td><td>${l.q}</td><td>${l.p} €</td><td>${(l.q*l.p).toFixed(2)} €</td></tr>`).join('')}
+    </tbody><tfoot>${tvaLine}</tfoot></table>${tvaNote}`;
+  f_preview.innerHTML=`Facture <b>${num}</b> prête — clique « Imprimer / PDF » puis « Enregistrer en PDF ».`;
+  factureDoc.classList.add('on');renderDash();window.print();
+}
+function exportData(){
+  const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='nettoyage-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importData(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{D=JSON.parse(r.result);if(!Array.isArray(D.plan))D.plan=[];save();
+    renderClients();renderPlanning();renderDash();renderFactureClients();
+    alert('Données importées ✅');}catch(e){alert('Fichier invalide');}};
+  r.readAsText(f);input.value='';
+}
+addLine();
+renderClients();
+renderDash();
+</script>
+</body>
+</html>
